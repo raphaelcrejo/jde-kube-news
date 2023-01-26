@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knpstgre-dplmnt
+spec:
+  selector:
+    matchLabels:
+      app: knpstgre
+    template:
+      metadata:
+        labels:
+          app: knpstgre
+      spec:
+        containers:
+          name: kubenewspostgre
+          image: postgres:15.0
+          env:
+            name: POSTGRES_BD
+            value: "kubenews"
+            name: POSTGRES_USER
+            value: "kubenews"
+            name: POSTGRES_PASSWORD
+            value: "Pg#123"
+          ports:
+            containerPort: 5432
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: knpstgre-svc
+spec:
+  selector:
+    app: knpstgre
+    ports:
+      port: 5432
+      protocol: TCP
+    type: ClusterIP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubenews-dplmnt
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: kubenews
+    template:
+      metadata:
+        labels:
+          app: kubenews
+      spec:
+        containers:
+          name: kubenewssite
+          image: raphaelcrejo/jde-kube-news:latest
+          env:
+            name: DB_DATABASE
+            value: "kubenews"
+            name: DB_USERNAME
+            value: "kubenews"
+            name: DB_PASSWORD
+            value: "Pg#123"
+            name: DB_HOST
+            value: "knpstgre-svc"
+            name: PORT
+            value: 8080
+          ports:
+            containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubenews-svc
+spec:
+  selector:
+    app: kubenews
+    ports:
+      port: 80
+      targetPort: 8080
+      nodePort: 30000
+    type: NodePort
