@@ -60,7 +60,7 @@ spec:
     spec:
       containers:
       - name: kubenewssite
-        image: raphaelcrejo/jde-kube-news:latest
+        image: raphaelcrejo/jde-kube-news:{{TAG}}
         env:
         - name: DB_DATABASE
           value: "kubenews"
